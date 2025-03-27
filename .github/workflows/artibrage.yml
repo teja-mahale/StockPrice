@@ -55,12 +55,12 @@ jobs:
               exit 1
             fi
             
-            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE <= 10.50" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE <= 11" | bc -l) -eq 1 ]]; then
               echo "Error: The price difference for IREDA is less than 10.50!"
               exit 1
             fi
       
-            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE >= 11.50" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE >= 13.50" | bc -l) -eq 1 ]]; then
               echo "Error: The price difference for IREDA is greater than 11.50!"
               exit 1
             fi
