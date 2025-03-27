@@ -1,0 +1,59 @@
+name: Fetch Equity Futures Data via cURL
+
+on:
+  repository_dispatch:
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  fetch-futures-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Fetch Futures Data Using cURL
+        env:
+          KITE_API_KEY: ${{ secrets.API_KEY }}
+          KITE_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        run: |
+          # Define multiple futures contracts
+          FUTURES_SYMBOLS=("NFO:HDFCLIFE25MARFUT" "NFO:RELIANCE25MARFUT" "NFO:TCS25MARFUT")
+      
+          # Convert array to API format (comma-separated values with 'i=' prefix)
+          SYMBOLS_QUERY=$(IFS='&i='; echo "${FUTURES_SYMBOLS[*]}")
+      
+          # API URL for fetching LTP (Last Traded Price)
+          API_URL="https://api.kite.trade/quote/ltp?i=NFO:ANGELONE25APRFUT&i=NFO:IREDA25APRFUT&i=NFO:TCS25MARFUT&i=NSE:ANGELONE&i=NSE:TCS&i=&i=NSE:IREDA"
+      
+          # Make the API request using cURL
+          RESPONSE=$(curl -s -X GET "$API_URL" \
+            -H "X-Kite-Version: 3" \
+            -H "Authorization: token $KITE_API_KEY:$KITE_ACCESS_TOKEN")
+      
+           echo "Response: $RESPONSE"
+
+           DIFFERENCE=$(echo "$RESPONSE" | jq '(
+              .data["NSE:ANGELONE"].last_price - .data["NFO:ANGELONE25APRFUT"].last_price
+            )')
+        
+            echo "Difference between ANGELONE Future and Stock: $DIFFERENCE"
+        
+            # Check if the difference exceeds 110
+            if (( $(echo "$DIFFERENCE > 113" | bc -l) )); then
+              echo "Error: The price difference exceeds 110!"
+              exit 1  # Fail the GitHub Actions job
+            fi
+
+           DIFFERENCE2=$(echo "$RESPONSE" | jq '(
+              .data["NSE:IREDA"].last_price - .data["NFO:IREDA25APRFUT"].last_price
+            )')
+        
+            echo "Difference between IREDA Future and Stock: $DIFFERENCE2"
+        
+            # Check if the difference less than 7.60
+            if (( $(echo "$DIFFERENCE < 8.10" | bc -l) )); then
+              echo "Error: The price difference exceeds 7.60!"
+              exit 1  # Fail the GitHub Actions job
+            fi
+          
