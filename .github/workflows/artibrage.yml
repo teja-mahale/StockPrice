@@ -45,7 +45,7 @@ jobs:
             echo "Difference between $STOCK and $FUTURE: $DIFFERENCE"
             
             # Define threshold checks
-            if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE <= 135" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE <= 125" | bc -l) -eq 1 ]]; then
               echo "Error: The price difference for ANGELONE exceeds 115!"
               exit 1
             fi
@@ -67,7 +67,7 @@ jobs:
           done
   
       - name: send message to whatsapp
-        if: steps.future.outcome == 'failure'
+        if: steps.future.outcome == 'failure' && ${{always()}}
         run: |
           curl -X POST "https://api.twilio.com/2010-04-01/Accounts/${{ secrets.TWILIO_ACCOUNT_SID }}/Messages.json" \
           --data-urlencode "Body=arbitrage opportunity!" \
