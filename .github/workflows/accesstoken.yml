@@ -1,0 +1,23 @@
+name: Generate Kite Access Token
+
+on:
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  kite-auth:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Access Token
+        run: |
+          response=$(curl -s -X POST "https://api.kite.trade/session/token" \
+           -H "Content-Type: application/x-www-form-urlencoded" \
+           -H "X-Kite-Version: 3" \
+           -d "api_key=${{ secrets.API_KEY }}" \
+           -d "request_token=${{ secrets.REFRESH_TOKEN }}" \
+           -d "checksum=$(echo -n '${{ secrets.API_KEY }}${{ secrets.REFRESH_TOKEN }}${{ secrets.API_SECRET }}' | sha256sum | awk '{print $1}')" )
+      
+           # Extract the access token using jq
+           access_token=$(echo $response | jq -r '.data.access_token')
+      
+           # Print the access token (for debugging; remove in production)
+           echo "Access Token: $access_token"
