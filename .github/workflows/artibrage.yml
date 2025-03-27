@@ -67,7 +67,7 @@ jobs:
           done
   
       - name: send message to whatsapp
-        if: steps.future.outcome == 'failure' && ${{always()}}
+        if: steps.future.outcome == 'failure'
         run: |
           curl -X POST "https://api.twilio.com/2010-04-01/Accounts/${{ secrets.TWILIO_ACCOUNT_SID }}/Messages.json" \
           --data-urlencode "Body=arbitrage opportunity!" \
