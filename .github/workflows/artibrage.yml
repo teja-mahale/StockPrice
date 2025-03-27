@@ -18,48 +18,51 @@ jobs:
           KITE_API_KEY: ${{ secrets.API_KEY }}
           KITE_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
-          # Define multiple futures contracts
-          FUTURES_SYMBOLS=("NFO:HDFCLIFE25MARFUT" "NFO:RELIANCE25MARFUT" "NFO:TCS25MARFUT")
+          # Define stock and futures pairs
+          STOCKS=("NSE:ANGELONE" "NSE:IREDA" "NSE:TCS")
+          FUTURES=("NFO:ANGELONE25APRFUT" "NFO:IREDA25APRFUT" "NFO:TCS25MARFUT")
       
-          # Convert array to API format (comma-separated values with 'i=' prefix)
-          SYMBOLS_QUERY=$(IFS='&i='; echo "${FUTURES_SYMBOLS[*]}")
-      
-          # API URL for fetching LTP (Last Traded Price)
-          API_URL="https://api.kite.trade/quote/ltp?i=NFO:ANGELONE25APRFUT&i=NFO:IREDA25APRFUT&i=NFO:TCS25MARFUT&i=NSE:ANGELONE&i=NSE:TCS&i=&i=NSE:IREDA"
-      
-          # Make the API request using cURL
+          # Construct API query dynamically
+          SYMBOLS_QUERY=""
+          for ((i=0; i<${#STOCKS[@]}; i++)); do
+            SYMBOLS_QUERY+="&i=${STOCKS[i]}&i=${FUTURES[i]}"
+          done
+          API_URL="https://api.kite.trade/quote/ltp?${SYMBOLS_QUERY}"  
+          
+          # Make the API request
           RESPONSE=$(curl -s -X GET "$API_URL" \
             -H "X-Kite-Version: 3" \
             -H "Authorization: token $KITE_API_KEY:$KITE_ACCESS_TOKEN")
-      
-           echo "Response: $RESPONSE"
-
-           DIFFERENCE=$(echo "$RESPONSE" | jq '(
-              .data["NSE:ANGELONE"].last_price - .data["NFO:ANGELONE25APRFUT"].last_price
-            )')
-        
-            echo "Difference between ANGELONE Future and Stock: $DIFFERENCE"
-        
-            # Check if the difference exceeds 110
-            if (( $(echo "$DIFFERENCE > 113" | bc -l) )); then
-              echo "Error: The price difference exceeds 110!"
-              exit 1  # Fail the GitHub Actions job
-            fi
-
-           DIFFERENCE2=$(echo "$RESPONSE" | jq '(
-              .data["NSE:IREDA"].last_price - .data["NFO:IREDA25APRFUT"].last_price
-            )')
-        
-            echo "Difference between IREDA Future and Stock: $DIFFERENCE2"
-        
-            # Check if the difference less than 7.60
-            if (( $(echo "$DIFFERENCE < 8.10" | bc -l) )); then
-              echo "Error: The price difference exceeds 7.60!"
-              exit 1  # Fail the GitHub Actions job
-            fi
           
+          echo "Response: $RESPONSE"
+          
+          # Process each stock-future pair
+          for ((i=0; i<${#STOCKS[@]}; i++)); do
+            STOCK=${STOCKS[i]}
+            FUTURE=${FUTURES[i]}
+            
+            DIFFERENCE=$(echo "$RESPONSE" | jq --arg stock "$STOCK" --arg future "$FUTURE" '(.data[$stock].last_price - .data[$future].last_price)')
+            echo "Difference between $STOCK and $FUTURE: $DIFFERENCE"
+            
+            # Define threshold checks
+            if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE <= 122" | bc -l) -eq 1 ]]; then
+              echo "Error: The price difference for ANGELONE exceeds 115!"
+              exit 1
+            fi
+            
+            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE <= 10.50" | bc -l) -eq 1 ]]; then
+              echo "Error: The price difference for IREDA is less than 10.50!"
+              exit 1
+            fi
+      
+            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE >= 11.50" | bc -l) -eq 1 ]]; then
+              echo "Error: The price difference for IREDA is greater than 11.50!"
+              exit 1
+            fi
+          done
+  
       - name: send message to whatsapp
-        if: steps.future.outcome == 'success'
+        if: steps.future.outcome == 'failure'
         run: |
           curl -X POST "https://api.twilio.com/2010-04-01/Accounts/${{ secrets.TWILIO_ACCOUNT_SID }}/Messages.json" \
           --data-urlencode "Body=arbitrage opportunity!" \
