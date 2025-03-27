@@ -22,55 +22,61 @@ jobs:
           STOCKS=("NSE:ANGELONE" "NSE:IREDA" "NSE:TCS")
           FUTURES=("NFO:ANGELONE25APRFUT" "NFO:IREDA25APRFUT" "NFO:TCS25MARFUT")
       
+          # Initialize error message variable
+          ERROR_MESSAGE=""
+      
           # Construct API query dynamically
           SYMBOLS_QUERY=""
           for ((i=0; i<${#STOCKS[@]}; i++)); do
             SYMBOLS_QUERY+="&i=${STOCKS[i]}&i=${FUTURES[i]}"
           done
-          API_URL="https://api.kite.trade/quote/ltp?${SYMBOLS_QUERY}"  
-          
+          API_URL="https://api.kite.trade/quote/ltp?${SYMBOLS_QUERY}"
+      
           # Make the API request
           RESPONSE=$(curl -s -X GET "$API_URL" \
             -H "X-Kite-Version: 3" \
             -H "Authorization: token $KITE_API_KEY:$KITE_ACCESS_TOKEN")
-          
+      
           echo "Response: $RESPONSE"
-          
+      
           # Process each stock-future pair
           for ((i=0; i<${#STOCKS[@]}; i++)); do
             STOCK=${STOCKS[i]}
             FUTURE=${FUTURES[i]}
-            
+      
             DIFFERENCE=$(echo "$RESPONSE" | jq --arg stock "$STOCK" --arg future "$FUTURE" '(.data[$stock].last_price - .data[$future].last_price)')
             echo "Difference between $STOCK and $FUTURE: $DIFFERENCE"
-            
+      
             # Define threshold checks
             if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE <= 115" | bc -l) -eq 1 ]]; then
-              echo "Error: The price difference for ANGELONE exceeds 115!"
-              exit 1
-            fi
-
-             if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE >= 125" | bc -l) -eq 1 ]]; then
-              echo "Error: The price difference for ANGELONE exceeds 140!"
-              exit 1
-            fi
-            
-            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE <= 11" | bc -l) -eq 1 ]]; then
-              echo "Error: The price difference for IREDA is less than 10.50!"
-              exit 1
+              ERROR_MESSAGE+="Error: The price difference for ANGELONE exceeds 115!\n"
             fi
       
-            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE >= 13.50" | bc -l) -eq 1 ]]; then
-              echo "Error: The price difference for IREDA is greater than 11.50!"
-              exit 1
+            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE <= 10.50" | bc -l) -eq 1 ]]; then
+              ERROR_MESSAGE+="Error: The price difference for IREDA is less than 10.50!\n"
+            fi
+      
+            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE >= 11.50" | bc -l) -eq 1 ]]; then
+              ERROR_MESSAGE+="Error: The price difference for IREDA is greater than 11.50!\n"
             fi
           done
-  
+      
+          # Set the ERROR_MESSAGE as an environment variable for subsequent steps
+          echo "ERROR_MESSAGE<<EOF" >> $GITHUB_ENV
+          echo -e "$ERROR_MESSAGE" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+      
+          # Check if there were any errors and exit if so
+          if [[ -n "$ERROR_MESSAGE" ]]; then
+            echo -e "$ERROR_MESSAGE"
+            exit 1
+          fi
+
       - name: send message to whatsapp
         if: failure()
         run: |
           curl -X POST "https://api.twilio.com/2010-04-01/Accounts/${{ secrets.TWILIO_ACCOUNT_SID }}/Messages.json" \
-          --data-urlencode "Body=arbitrage opportunity!" \
+          --data-urlencode "Body=${{env.ERROR_MESSAGE}}" \
           --data-urlencode "From=whatsapp:${{ secrets.TWILIO_WHATSAPP_NUMBER }}" \
           --data-urlencode "To=whatsapp:${{ secrets.TO_WHATSAPP_NUMBER }}" \
           -u "${{ secrets.TWILIO_ACCOUNT_SID }}:${{ secrets.TWILIO_AUTH_TOKEN }}"
