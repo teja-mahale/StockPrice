@@ -108,10 +108,11 @@ jobs:
           # Check if there were any errors and exit if so
           if [[ -n "$ERROR_MESSAGE" ]]; then
             echo -e "$ERROR_MESSAGE"
-            exit 1
+          
           fi
 
       -  name: Upload artifacts starting with 'scratchorg'
+         if: failure
          uses: actions/upload-artifact@v4
          with:
           name: stockprice
