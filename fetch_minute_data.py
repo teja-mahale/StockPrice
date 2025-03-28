@@ -9,10 +9,10 @@ KITE_ACCESS_TOKEN = os.getenv("KITE_ACCESS_TOKEN")
 
 # Instrument Tokens (Replace with actual values)
 INSTRUMENT_TOKENS = {
-    "NSE:ANGELONE": "123456",
-    "NSE:IREDA": "789101",
-    "NSE:CAMS": "112131",
-    "NSE:TATAELXSI": "415161"
+    "NSE:ANGELONE": "82945",
+    "NSE:IREDA": "5186817",
+    "NSE:CAMS": "87553",
+    "NSE:TATAELXSI": "873217"
 }
 
 # Get today's date
