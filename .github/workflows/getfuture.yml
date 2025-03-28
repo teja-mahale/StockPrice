@@ -1,118 +1,35 @@
-name: Fetch Equity Futures Data via cURL
+name: Fetch 1-Minute Close Prices
 
 on:
-  #repository_dispatch:
-  workflow_dispatch:  # Allows manual trigger
+  schedule:
+    - cron: "5 10 * * 1-5" # Runs at 3:35 PM IST (10:05 AM UTC)
+  workflow_dispatch: # Allows manual trigger
 
 jobs:
-  fetch-futures-data:
+  fetch_minute_data:
     runs-on: ubuntu-latest
-
-
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
 
+      - name: Install Dependencies
+        run: pip install requests pandas
 
-
-      - name: Fetch Minute-Wise Close Prices for Futures & NSE Stocks
-        id: future
+      - name: Fetch 1-Minute Data
         env:
-          KITE_API_KEY: ${{ secrets.API_KEY }}
-          KITE_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          KITE_API_KEY: ${{ secrets.KITE_API_KEY }}
+          KITE_ACCESS_TOKEN: ${{ secrets.KITE_ACCESS_TOKEN }}
         run: |
-          # Define stock and futures pairs
-          STOCKS=("NSE:ANGELONE" "NSE:IREDA" "NSE:CAMS" "NSE:TATAELXSI")
-          FUTURES=("NFO:ANGELONE25APRFUT" "NFO:IREDA25APRFUT" "NFO:CAMS25APRFUT" "NFO:TATAELXSI25APRFUT")
-      
-          # CSV file path
-          CSV_FILE="stock_data.csv"
-      
-          # Check if CSV file exists, if not, create it with headers
-          if [[ ! -f "$CSV_FILE" ]]; then
-            echo "Timestamp,Stock,Stock Close Price,Future,Future Close Price,Difference" > "$CSV_FILE"
-          fi
-      
-          # Initialize error message variable
-          ERROR_MESSAGE=""
-      
-          # Construct API query dynamically
-          SYMBOLS_QUERY=""
-          for ((i=0; i<${#STOCKS[@]}; i++)); do
-            SYMBOLS_QUERY+="&i=${STOCKS[i]}&i=${FUTURES[i]}"
-          done
-          API_URL="https://api.kite.trade/quote?${SYMBOLS_QUERY}"
-      
-          # Make the API request
-          RESPONSE=$(curl -s -X GET "$API_URL" \
-            -H "X-Kite-Version: 3" \
-            -H "Authorization: token $KITE_API_KEY:$KITE_ACCESS_TOKEN")
-      
-          echo "Response: $RESPONSE"
-      
-          # Get current timestamp
-          TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
-      
-          # Process each stock-future pair
-          for ((i=0; i<${#STOCKS[@]}; i++)); do
-            STOCK=${STOCKS[i]}
-            FUTURE=${FUTURES[i]}
-      
-            # Extract close price from the API response
-            STOCK_CLOSE=$(echo "$RESPONSE" | jq --arg stock "$STOCK" '.data[$stock].ohlc.close')
-            FUTURE_CLOSE=$(echo "$RESPONSE" | jq --arg future "$FUTURE" '.data[$future].ohlc.close')
-      
-            echo "Stock: $STOCK | Close Price: $STOCK_CLOSE"
-            echo "Future: $FUTURE | Close Price: $FUTURE_CLOSE"
-      
-            # Calculate price difference
-            DIFFERENCE=$(echo "$STOCK_CLOSE - $FUTURE_CLOSE" | bc -l)
-            echo "Difference between $STOCK and $FUTURE: $DIFFERENCE"
-      
-            # Append data to CSV
-            echo "$TIMESTAMP,$STOCK,$STOCK_CLOSE,$FUTURE,$FUTURE_CLOSE,$DIFFERENCE" >> "$CSV_FILE"
-      
-            # Define threshold checks
-            if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE <= 112" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for ANGELONE is too low: $DIFFERENCE!\n"
-            fi
-      
-            if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE >= 120" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for ANGELONE is too high: $DIFFERENCE!\n"
-            fi
-      
-            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE <= 7.5" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for IREDA is too low: $DIFFERENCE!\n"
-            fi
-      
-            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE >= 9" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for IREDA is too high: $DIFFERENCE!\n"
-            fi
-      
-            if [[ "$STOCK" == "NSE:TATAELXSI" && $(echo "$DIFFERENCE <= 115" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for TATAELXSI is too low: $DIFFERENCE!\n"
-            fi
-      
-            if [[ "$STOCK" == "NSE:CAMS" && $(echo "$DIFFERENCE <= 105" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for CAMS is too low: $DIFFERENCE!\n"
-            fi
-          done
-      
-          # Set the ERROR_MESSAGE as an environment variable for subsequent steps
-          echo "ERROR_MESSAGE<<EOF" >> $GITHUB_ENV
-          echo -e "$ERROR_MESSAGE" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-      
-          # Check if there were any errors and exit if so
-          if [[ -n "$ERROR_MESSAGE" ]]; then
-            echo -e "$ERROR_MESSAGE"
-          
-          fi
+          python fetch_minute_data.py
 
-      -  name: Upload artifacts starting with 'scratchorg'         
-         uses: actions/upload-artifact@v4
-         with:
-          name: stockprice
-          path: stock_data.csv
+      - name: Upload CSV as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: minute-data
+          path: minute_data_today.csv
