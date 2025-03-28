@@ -23,8 +23,8 @@ jobs:
 
       - name: Fetch 1-Minute Data
         env:
-          KITE_API_KEY: ${{ secrets.KITE_API_KEY }}
-          KITE_ACCESS_TOKEN: ${{ secrets.KITE_ACCESS_TOKEN }}
+          KITE_API_KEY: ${{ secrets.API_KEY }}
+          KITE_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
           python fetch_minute_data.py
 
