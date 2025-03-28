@@ -19,7 +19,7 @@ jobs:
           KITE_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
           # Define stock and futures pairs
-          STOCKS=("NSE:ANGELONE" "NSE:IREDA" "NSE:TCS" "NSE:CAMS" "NSE:TATAELXSI")
+          STOCKS=("NSE:ANGELONE" "NSE:IREDA" "NSE:CAMS" "NSE:TATAELXSI")
           FUTURES=("NFO:ANGELONE25APRFUT" "NFO:IREDA25APRFUT" "NFO:CAMS25APRFUT" "NFO:TATAELXSI25APRFUT")
       
           # Initialize error message variable
