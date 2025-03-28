@@ -112,7 +112,7 @@ jobs:
           fi
 
       -  name: Upload artifacts starting with 'scratchorg'
-         if: failure
+         if: failure()
          uses: actions/upload-artifact@v4
          with:
           name: stockprice
