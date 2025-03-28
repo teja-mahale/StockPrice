@@ -29,7 +29,7 @@ jobs:
           python fetch_minute_data.py
 
       - name: Upload CSV as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: minute-data
           path: minute_data_today.csv
