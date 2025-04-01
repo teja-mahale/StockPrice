@@ -1,7 +1,7 @@
 name: Fetch Equity Futures Data via cURL
 
 on:
-  repository_dispatch:
+  #repository_dispatch:
   workflow_dispatch:  # Allows manual trigger
 
 jobs:
