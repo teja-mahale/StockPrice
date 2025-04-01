@@ -92,3 +92,28 @@ jobs:
           --data-urlencode "From=whatsapp:${{ secrets.TWILIO_WHATSAPP_NUMBER }}" \
           --data-urlencode "To=whatsapp:${{ secrets.TO_WHATSAPP_NUMBER }}" \
           -u "${{ secrets.TWILIO_ACCOUNT_SID }}:${{ secrets.TWILIO_AUTH_TOKEN }}"
+
+
+      - name: Dispatch Slack notification
+        if: failure()
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
+          payload: |
+            {
+              "channel": "${{ secrets.SLACK_CHANNEL_ID }}",
+              "text": "${{env.ERROR_MESSAGE}}",
+              "attachments": [
+                {
+                  "title": "Scheduled Job Status: Failed",
+                  "fields": [
+                    {
+                      "title": "Link to Latest Job",
+                      "value": "https://github.com/TrailheadTechOps/DRM-TA-UCS/actions/runs/${{ env.run_id }}",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
