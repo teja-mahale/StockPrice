@@ -56,11 +56,11 @@ jobs:
               ERROR_MESSAGE+="Error: The price difference for ANGELONE exceeds $DIFFERENCE!\n"
             fi
       
-            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE <= 8" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE <= 9.50" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for IREDA is less than $DIFFERENCE!\n"
             fi
       
-            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE >= 10" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE >= 11" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for IREDA is greater than $DIFFERENCE!\n"
             fi
 
