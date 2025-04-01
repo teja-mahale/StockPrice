@@ -64,11 +64,11 @@ jobs:
               ERROR_MESSAGE+="Error: The price difference for IREDA is greater than $DIFFERENCE!\n"
             fi
 
-             if [[ "$STOCK" == "NSE:TATAELXSI" && $(echo "$DIFFERENCE <= 100" | bc -l) -eq 1 ]]; then
+             if [[ "$STOCK" == "NSE:TATAELXSI" && $(echo "$DIFFERENCE <= 50" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for TATAELXSI is lesser than $DIFFERENCE!\n"
             fi
 
-             if [[ "$STOCK" == "NSE:CAMS" && $(echo "$DIFFERENCE >= 48" | bc -l) -eq 1 ]]; then
+             if [[ "$STOCK" == "NSE:CAMS" && $(echo "$DIFFERENCE >= 38" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for CAMS is lesser than $DIFFERENCE!\n"
             fi
           done
