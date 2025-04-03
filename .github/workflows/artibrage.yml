@@ -1,7 +1,7 @@
 name: Fetch Equity Futures Data via cURL
 
 on:
-  #repository_dispatch:
+  repository_dispatch:
   workflow_dispatch:  # Allows manual trigger
 
 jobs:
@@ -48,29 +48,19 @@ jobs:
             echo "Difference between $STOCK and $FUTURE: $DIFFERENCE"
       
             # Define threshold checks
-            if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE <= 90" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE >= 42" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for ANGELONE exceeds $DIFFERENCE!\n"
             fi
 
-            if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE >= 120" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for ANGELONE exceeds $DIFFERENCE!\n"
-            fi
+           
       
-            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE <= 7" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for IREDA is less than $DIFFERENCE!\n"
-            fi
+           
       
-            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE >= 9.50" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE >= 4.50" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for IREDA is greater than $DIFFERENCE!\n"
             fi
 
-             if [[ "$STOCK" == "NSE:TATAELXSI" && $(echo "$DIFFERENCE <= 50" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for TATAELXSI is lesser than $DIFFERENCE!\n"
-            fi
-
-             if [[ "$STOCK" == "NSE:CAMS" && $(echo "$DIFFERENCE <=0" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for CAMS is lesser than $DIFFERENCE!\n"
-            fi
+            
           done
       
           # Set the ERROR_MESSAGE as an environment variable for subsequent steps
