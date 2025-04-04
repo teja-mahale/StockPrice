@@ -57,7 +57,7 @@ jobs:
             fi
 
 
-            if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE >= 21" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE >= 20" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for TATATECH exceeds $DIFFERENCE!\n"
             fi
            
