@@ -58,11 +58,11 @@ jobs:
 
 
             if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE >= 21" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for ANGELONE exceeds $DIFFERENCE!\n"
+              ERROR_MESSAGE+="Error: The price difference for TATATECH exceeds $DIFFERENCE!\n"
             fi
            
-            if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE <= 19" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for ANGELONE exceeds $DIFFERENCE!\n"
+            if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE <= 18" | bc -l) -eq 1 ]]; then
+              ERROR_MESSAGE+="Error: The price difference for TATATECH exceeds $DIFFERENCE!\n"
             fi
            
       
