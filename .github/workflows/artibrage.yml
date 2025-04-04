@@ -19,8 +19,8 @@ jobs:
           KITE_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
           # Define stock and futures pairs
-          STOCKS=("NSE:ANGELONE" "NSE:IREDA" "NSE:CAMS" "NSE:TATAELXSI")
-          FUTURES=("NFO:ANGELONE25APRFUT" "NFO:IREDA25APRFUT" "NFO:CAMS25APRFUT" "NFO:TATAELXSI25APRFUT")
+          STOCKS=("NSE:ANGELONE" "NSE:IREDA" "NSE:CAMS" "NSE:TATAELXSI" "NSE:TATATECH")
+          FUTURES=("NFO:ANGELONE25APRFUT" "NFO:IREDA25APRFUT" "NFO:CAMS25APRFUT" "NFO:TATAELXSI25APRFUT" "NFO:TATATECH25APRFUT")
       
           # Initialize error message variable
           ERROR_MESSAGE=""
@@ -48,14 +48,18 @@ jobs:
             echo "Difference between $STOCK and $FUTURE: $DIFFERENCE"
       
             # Define threshold checks
-            if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE < 100" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE <= 105" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for ANGELONE exceeds $DIFFERENCE!\n"
             fi
 
-            if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE >= 108" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE >= 115" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for ANGELONE exceeds $DIFFERENCE!\n"
             fi
 
+
+            if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE >= 115" | bc -l) -eq 1 ]]; then
+              ERROR_MESSAGE+="Error: The price difference for ANGELONE exceeds $DIFFERENCE!\n"
+            fi
            
       
            
