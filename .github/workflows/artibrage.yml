@@ -52,6 +52,9 @@ jobs:
               ERROR_MESSAGE+="Error: The price difference for ANGELONE exceeds $DIFFERENCE!\n"
             fi          
 
+            if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE >= 18" | bc -l) -eq 1 ]]; then
+              ERROR_MESSAGE+="Error: The price difference for ANGELONE exceeds $DIFFERENCE!\n"
+            fi  
          
       
             if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE <= 2" | bc -l) -eq 1 ]]; then
