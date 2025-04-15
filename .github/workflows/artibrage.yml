@@ -1,7 +1,7 @@
 name: Fetch Equity Futures Data via cURL
 
 on:
-  #repository_dispatch:
+  repository_dispatch:
   workflow_dispatch:  # Allows manual trigger
 
 jobs:
@@ -57,11 +57,11 @@ jobs:
               ERROR_MESSAGE+="Error: The price difference for ANGELONE exceeds $DIFFERENCE!\n"
             fi     
 
-            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE >= 6.50" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE >= 6" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for IREDA exceeds $DIFFERENCE!\n"
             fi  
 
-             if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE <= 5.50" | bc -l) -eq 1 ]]; then
+             if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE <= 5" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for IREDA below $DIFFERENCE!\n"
             fi  
          
