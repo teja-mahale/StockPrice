@@ -53,16 +53,16 @@ jobs:
             fi       
 
              # Define threshold checks
-            if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE >= 32" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE >= 30" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for ANGELONE exceeds $DIFFERENCE!\n"
             fi     
 
-            if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE >= 17" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for TATATECH exceeds $DIFFERENCE!\n"
+            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE >= 6.50" | bc -l) -eq 1 ]]; then
+              ERROR_MESSAGE+="Error: The price difference for IREDA exceeds $DIFFERENCE!\n"
             fi  
 
-             if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE <= 12" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for TATATECH exceeds $DIFFERENCE!\n"
+             if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE <= 5.50" | bc -l) -eq 1 ]]; then
+              ERROR_MESSAGE+="Error: The price difference for IREDA below $DIFFERENCE!\n"
             fi  
          
       
