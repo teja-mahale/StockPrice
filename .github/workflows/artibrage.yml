@@ -1,4 +1,4 @@
-\42name: Fetch Equity Futures Data via cURL
+name: Fetch Equity Futures Data via cURL
 
 on:
   repository_dispatch:
