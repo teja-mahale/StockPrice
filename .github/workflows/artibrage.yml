@@ -53,7 +53,7 @@ jobs:
             fi       
 
              # Define threshold checks
-            if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE >= 33" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE >= 30.50 | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for TATATECH exceeds $DIFFERENCE!\n"
             fi     
 
