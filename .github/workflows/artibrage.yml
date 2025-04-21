@@ -57,11 +57,11 @@ jobs:
               ERROR_MESSAGE+="Error: The price difference for TATATECH exceeds $DIFFERENCE!\n"
             fi     
 
-            if [[ "$STOCK" == "NSE:TATAELXSI" && $(echo "$DIFFERENCE >= 95" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:TATAELXSI" && $(echo "$DIFFERENCE >= 110" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for TATAELXSI exceeds $DIFFERENCE!\n"
             fi  
 
-             if [[ "$STOCK" == "NSE:TATAELXSI" && $(echo "$DIFFERENCE <= 60" | bc -l) -eq 1 ]]; then
+             if [[ "$STOCK" == "NSE:TATAELXSI" && $(echo "$DIFFERENCE <= 90" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for TATAELXSI below $DIFFERENCE!\n"
             fi  
              if [[ "$STOCK" == "NSE:SONACOMS" && $(echo "$DIFFERENCE <= 13" | bc -l) -eq 1 ]]; then
