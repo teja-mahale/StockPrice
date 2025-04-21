@@ -1,4 +1,4 @@
-name: Fetch Equity Futures Data via cURL
+\42name: Fetch Equity Futures Data via cURL
 
 on:
   repository_dispatch:
@@ -57,11 +57,11 @@ jobs:
               ERROR_MESSAGE+="Error: The price difference for TATATECH exceeds $DIFFERENCE!\n"
             fi     
 
-            if [[ "$STOCK" == "NSE:TATAELXSI" && $(echo "$DIFFERENCE >= 110" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:TATAELXSI" && $(echo "$DIFFERENCE >= 130" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for TATAELXSI exceeds $DIFFERENCE!\n"
             fi  
 
-             if [[ "$STOCK" == "NSE:TATAELXSI" && $(echo "$DIFFERENCE <= 90" | bc -l) -eq 1 ]]; then
+             if [[ "$STOCK" == "NSE:TATAELXSI" && $(echo "$DIFFERENCE <= 105" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for TATAELXSI below $DIFFERENCE!\n"
             fi  
              if [[ "$STOCK" == "NSE:SONACOMS" && $(echo "$DIFFERENCE <= 13" | bc -l) -eq 1 ]]; then
@@ -70,7 +70,7 @@ jobs:
              if [[ "$STOCK" == "NSE:SONACOMS" && $(echo "$DIFFERENCE >= 18" | bc -l) -eq 1 ]]; then
              ERROR_MESSAGE+="Error: The price difference for SONACOMS below $DIFFERENCE!\n"
             fi             
-             if [[ "$STOCK" == "NSE:AUBANK" && $(echo "$DIFFERENCE <= 13" | bc -l) -eq 1 ]]; then
+             if [[ "$STOCK" == "NSE:AUBANK" && $(echo "$DIFFERENCE <= 14" | bc -l) -eq 1 ]]; then
              ERROR_MESSAGE+="Error: The price difference for AUBANK below $DIFFERENCE!\n"
             fi            
              if [[ "$STOCK" == "NSE:AUBANK" && $(echo "$DIFFERENCE >= 22" | bc -l) -eq 1 ]]; then
