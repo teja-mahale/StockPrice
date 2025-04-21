@@ -49,32 +49,32 @@ jobs:
       
             # Define threshold checks
             if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE <= 30" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for ANGELONE below $DIFFERENCE!\n"
+              ERROR_MESSAGE+="Error: The price difference for TATATECH below $DIFFERENCE!\n"
             fi       
 
              # Define threshold checks
             if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE >= 33" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for ANGELONE exceeds $DIFFERENCE!\n"
+              ERROR_MESSAGE+="Error: The price difference for TATATECH exceeds $DIFFERENCE!\n"
             fi     
 
             if [[ "$STOCK" == "NSE:TATAELXSI" && $(echo "$DIFFERENCE >= 120" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for IREDA exceeds $DIFFERENCE!\n"
+              ERROR_MESSAGE+="Error: The price difference for TATAELXSI exceeds $DIFFERENCE!\n"
             fi  
 
              if [[ "$STOCK" == "NSE:TATAELXSI" && $(echo "$DIFFERENCE <= 90" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for IREDA below $DIFFERENCE!\n"
+              ERROR_MESSAGE+="Error: The price difference for TATAELXSI below $DIFFERENCE!\n"
             fi  
-             if [[ "$STOCK" == "NSE:SONACOMS" && $(echo "$DIFFERENCE <= 19" | bc -l) -eq 1 ]]; then
-             ERROR_MESSAGE+="Error: The price difference for IREDA below $DIFFERENCE!\n"
+             if [[ "$STOCK" == "NSE:SONACOMS" && $(echo "$DIFFERENCE <= 16" | bc -l) -eq 1 ]]; then
+             ERROR_MESSAGE+="Error: The price difference for SONACOMS below $DIFFERENCE!\n"
             fi 
-             if [[ "$STOCK" == "NSE:SONACOMS" && $(echo "$DIFFERENCE >= 22" | bc -l) -eq 1 ]]; then
-             ERROR_MESSAGE+="Error: The price difference for IREDA below $DIFFERENCE!\n"
+             if [[ "$STOCK" == "NSE:SONACOMS" && $(echo "$DIFFERENCE >= 20" | bc -l) -eq 1 ]]; then
+             ERROR_MESSAGE+="Error: The price difference for SONACOMS below $DIFFERENCE!\n"
             fi             
              if [[ "$STOCK" == "NSE:AUBANK" && $(echo "$DIFFERENCE <= 11" | bc -l) -eq 1 ]]; then
-             ERROR_MESSAGE+="Error: The price difference for IREDA below $DIFFERENCE!\n"
+             ERROR_MESSAGE+="Error: The price difference for AUBANK below $DIFFERENCE!\n"
             fi            
              if [[ "$STOCK" == "NSE:AUBANK" && $(echo "$DIFFERENCE >= 13" | bc -l) -eq 1 ]]; then
-             ERROR_MESSAGE+="Error: The price difference for IREDA below $DIFFERENCE!\n"
+             ERROR_MESSAGE+="Error: The price difference for AUBANK below $DIFFERENCE!\n"
             fi  
          
       
