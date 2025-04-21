@@ -1,7 +1,7 @@
 name: Fetch Equity Futures Data via cURL
 
 on:
-  #repository_dispatch:
+  repository_dispatch:
   workflow_dispatch:  # Allows manual trigger
 
 jobs:
@@ -19,8 +19,8 @@ jobs:
           KITE_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
           # Define stock and futures pairs
-          STOCKS=("NSE:ANGELONE" "NSE:IREDA" "NSE:CAMS" "NSE:TATAELXSI" "NSE:TATATECH")
-          FUTURES=("NFO:ANGELONE25APRFUT" "NFO:IREDA25APRFUT" "NFO:CAMS25APRFUT" "NFO:TATAELXSI25APRFUT" "NFO:TATATECH25APRFUT")
+          STOCKS=("NSE:ANGELONE" "NSE:IREDA" "NSE:CAMS" "NSE:TATAELXSI" "NSE:TATATECH" "NSE:SONACOMS" "NSE:AUBANK")
+          FUTURES=("NFO:ANGELONE25MAYFUT" "NFO:IREDA25MAYFUT" "NFO:CAMS25MAYFUT" "NFO:TATAELXSI25MAYFUT" "NFO:TATATECH25MAYFUT" "NFO:SONACOMS25MAYFUT" "NSE:AUBANK25MAYFUT")
       
           # Initialize error message variable
           ERROR_MESSAGE=""
@@ -48,21 +48,33 @@ jobs:
             echo "Difference between $STOCK and $FUTURE: $DIFFERENCE"
       
             # Define threshold checks
-            if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE <= 50" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for ANGELONE exceeds $DIFFERENCE!\n"
+            if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE <= 30" | bc -l) -eq 1 ]]; then
+              ERROR_MESSAGE+="Error: The price difference for ANGELONE below $DIFFERENCE!\n"
             fi       
 
              # Define threshold checks
-            if [[ "$STOCK" == "NSE:ANGELONE" && $(echo "$DIFFERENCE >= 75" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE >= 33" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for ANGELONE exceeds $DIFFERENCE!\n"
             fi     
 
-            if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE >= 12" | bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:TATAELXSI" && $(echo "$DIFFERENCE >= 120" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for IREDA exceeds $DIFFERENCE!\n"
             fi  
 
-             if [[ "$STOCK" == "NSE:IREDA" && $(echo "$DIFFERENCE <= 3" | bc -l) -eq 1 ]]; then
+             if [[ "$STOCK" == "NSE:TATAELXSI" && $(echo "$DIFFERENCE <= 90" | bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for IREDA below $DIFFERENCE!\n"
+            fi  
+             if [[ "$STOCK" == "NSE:SONACOMS" && $(echo "$DIFFERENCE <= 19" | bc -l) -eq 1 ]]; then
+             ERROR_MESSAGE+="Error: The price difference for IREDA below $DIFFERENCE!\n"
+            fi 
+             if [[ "$STOCK" == "NSE:SONACOMS" && $(echo "$DIFFERENCE >= 22" | bc -l) -eq 1 ]]; then
+             ERROR_MESSAGE+="Error: The price difference for IREDA below $DIFFERENCE!\n"
+            fi             
+             if [[ "$STOCK" == "NSE:AUBANK" && $(echo "$DIFFERENCE <= 11" | bc -l) -eq 1 ]]; then
+             ERROR_MESSAGE+="Error: The price difference for IREDA below $DIFFERENCE!\n"
+            fi            
+             if [[ "$STOCK" == "NSE:AUBANK" && $(echo "$DIFFERENCE >= 13" | bc -l) -eq 1 ]]; then
+             ERROR_MESSAGE+="Error: The price difference for IREDA below $DIFFERENCE!\n"
             fi  
          
       
