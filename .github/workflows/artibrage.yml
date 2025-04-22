@@ -73,7 +73,7 @@ jobs:
              if [[ "$STOCK" == "NSE:AUBANK" && $(echo "$DIFFERENCE <=18" | bc -l) -eq 1 ]]; then
              ERROR_MESSAGE+="Error: The price difference for AUBANK below $DIFFERENCE!\n"
             fi            
-             if [[ "$STOCK" == "NSE:AUBANK" && $(echo "$DIFFERENCE >= 20.50" | bc -l) -eq 1 ]]; then
+             if [[ "$STOCK" == "NSE:AUBANK" && $(echo "$DIFFERENCE >= 25" | bc -l) -eq 1 ]]; then
              ERROR_MESSAGE+="Error: The price difference for AUBANK below $DIFFERENCE!\n"
             fi  
              if [[ "$STOCK" == "NSE:CDSL" && $(echo "$DIFFERENCE <= 40" | bc -l) -eq 1 ]]; then
