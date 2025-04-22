@@ -53,7 +53,7 @@ jobs:
             fi       
 
              # Define threshold checks
-            if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE >= 36"| bc -l) -eq 1 ]]; then
+            if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE >= 37"| bc -l) -eq 1 ]]; then
               ERROR_MESSAGE+="Error: The price difference for TATATECH exceeds $DIFFERENCE!\n"
             fi     
 
@@ -64,10 +64,10 @@ jobs:
              if [[ "$STOCK" == "NSE:SONACOMS" && $(echo "$DIFFERENCE >= 20" | bc -l) -eq 1 ]]; then
              ERROR_MESSAGE+="Error: The price difference for SONACOMS below $DIFFERENCE!\n"
             fi             
-             if [[ "$STOCK" == "NSE:AUBANK" && $(echo "$DIFFERENCE <=18" | bc -l) -eq 1 ]]; then
+             if [[ "$STOCK" == "NSE:AUBANK" && $(echo "$DIFFERENCE <=15" | bc -l) -eq 1 ]]; then
              ERROR_MESSAGE+="Error: The price difference for AUBANK below $DIFFERENCE!\n"
             fi            
-             if [[ "$STOCK" == "NSE:AUBANK" && $(echo "$DIFFERENCE >= 25" | bc -l) -eq 1 ]]; then
+             if [[ "$STOCK" == "NSE:AUBANK" && $(echo "$DIFFERENCE >= 19.50" | bc -l) -eq 1 ]]; then
              ERROR_MESSAGE+="Error: The price difference for AUBANK below $DIFFERENCE!\n"
             fi  
              if [[ "$STOCK" == "NSE:CDSL" && $(echo "$DIFFERENCE <= 40" | bc -l) -eq 1 ]]; then
