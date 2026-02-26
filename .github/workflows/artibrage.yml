@@ -1,3 +1,4 @@
+
 name: Fetch Equity Futures Data via cURL
 
 on:
@@ -12,98 +13,90 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install kiteconnect pandas
+
       - name: Fetch Futures Data Using cURL
+        id: future2
+        env:
+          KITE_API_KEY: ${{ secrets.API_KEY }}
+          KITE_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        run: |
+           python history.py
+
+      - name: Upload CSV Artifact
+        uses: actions/upload-artifact@v4
+        with:
+         name: spot-futures-data
+         path: kfintech_term_structure_full_6months.csv
+
+      - name: Compare RVNL Spot vs MAR26 Future
         id: future
         env:
           KITE_API_KEY: ${{ secrets.API_KEY }}
           KITE_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
-          # Define stock and futures pairs
-          STOCKS=("NSE:ANGELONE" "NSE:IREDA" "NSE:CAMS" "NSE:TATAELXSI" "NSE:TATATECH" "NSE:SONACOMS" "NSE:AUBANK" "NSE:CDSL")
-          FUTURES=("NFO:ANGELONE25MAYFUT" "NFO:IREDA25MAYFUT" "NFO:CAMS25MAYFUT" "NFO:TATAELXSI25MAYFUT" "NFO:TATATECH25MAYFUT" "NFO:SONACOMS25MAYFUT" "NFO:AUBANK25MAYFUT" "NFO:CDSL25MAYFUT")
+          # Define instruments
+          SPOT="NSE:RVNL"
+          MAR_FUT="NFO:RVNL26MARFUT"
       
-          # Initialize error message variable
           ERROR_MESSAGE=""
       
-          # Construct API query dynamically
-          SYMBOLS_QUERY=""
-          for ((i=0; i<${#STOCKS[@]}; i++)); do
-            SYMBOLS_QUERY+="&i=${STOCKS[i]}&i=${FUTURES[i]}"
-          done
-          API_URL="https://api.kite.trade/quote/ltp?${SYMBOLS_QUERY}"
+          # Construct API query
+          API_URL="https://api.kite.trade/quote/ltp?i=${SPOT}&i=${MAR_FUT}"
       
-          # Make the API request
+          # Make API request
           RESPONSE=$(curl -s -X GET "$API_URL" \
             -H "X-Kite-Version: 3" \
             -H "Authorization: token $KITE_API_KEY:$KITE_ACCESS_TOKEN")
       
           echo "Response: $RESPONSE"
       
-          # Process each stock-future pair
-          for ((i=0; i<${#STOCKS[@]}; i++)); do
-            STOCK=${STOCKS[i]}
-            FUTURE=${FUTURES[i]}
+          # Extract prices using jq
+          SPOT_PRICE=$(echo "$RESPONSE" | jq --arg sym "$SPOT" -r '.data[$sym].last_price')
+          MAR_PRICE=$(echo "$RESPONSE" | jq --arg sym "$MAR_FUT" -r '.data[$sym].last_price')
       
-            DIFFERENCE=$(echo "$RESPONSE" | jq --arg stock "$STOCK" --arg future "$FUTURE" '(.data[$stock].last_price - .data[$future].last_price)')
-            echo "Difference between $STOCK and $FUTURE: $DIFFERENCE"
+          echo "Spot Price: $SPOT_PRICE"
+          echo "MAR26 Fut Price: $MAR_PRICE"
       
-            # Define threshold checks
-            if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE <= 35" | bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for TATATECH below $DIFFERENCE!\n"
-            fi       
-
-             # Define threshold checks
-            if [[ "$STOCK" == "NSE:TATATECH" && $(echo "$DIFFERENCE >= 37"| bc -l) -eq 1 ]]; then
-              ERROR_MESSAGE+="Error: The price difference for TATATECH exceeds $DIFFERENCE!\n"
-            fi     
-
-           
-             if [[ "$STOCK" == "NSE:SONACOMS" && $(echo "$DIFFERENCE <= 10.50" | bc -l) -eq 1 ]]; then
-             ERROR_MESSAGE+="Error: The price difference for SONACOMS below $DIFFERENCE!\n"
-            fi 
-             if [[ "$STOCK" == "NSE:SONACOMS" && $(echo "$DIFFERENCE >= 20" | bc -l) -eq 1 ]]; then
-             ERROR_MESSAGE+="Error: The price difference for SONACOMS below $DIFFERENCE!\n"
-            fi             
-             if [[ "$STOCK" == "NSE:AUBANK" && $(echo "$DIFFERENCE <=14" | bc -l) -eq 1 ]]; then
-             ERROR_MESSAGE+="Error: The price difference for AUBANK below $DIFFERENCE!\n"
-            fi            
-             if [[ "$STOCK" == "NSE:AUBANK" && $(echo "$DIFFERENCE >= 16" | bc -l) -eq 1 ]]; then
-             ERROR_MESSAGE+="Error: The price difference for AUBANK below $DIFFERENCE!\n"
-            fi  
-             if [[ "$STOCK" == "NSE:CDSL" && $(echo "$DIFFERENCE <= 40" | bc -l) -eq 1 ]]; then
-             ERROR_MESSAGE+="Error: The price difference for AUBANK below $DIFFERENCE!\n"
-            fi  
-         
+          # Validate prices
+          if [[ "$SPOT_PRICE" == "null" || "$MAR_PRICE" == "null" ]]; then
+            echo "Failed to fetch prices"
+            exit 1
+          fi
       
-           
-
-            
-           
-
-            
-          done
+          # Calculate spread (Future - Spot)
+          DIFFERENCE=$(echo "$SPOT_PRICE - $MAR_PRICE" | bc -l)
       
-          # Set the ERROR_MESSAGE as an environment variable for subsequent steps
+          echo "Spread (MAR - Spot): $DIFFERENCE"
+      
+          # Threshold checks
+          if (( $(echo "$DIFFERENCE <= 26" | bc -l) )); then
+            ERROR_MESSAGE+="Alert: RVNL MAR-Spot spread is less than or equal to 26. Current Spread: $DIFFERENCE\n"
+          fi
+      
+          if (( $(echo "$DIFFERENCE >= 32" | bc -l) )); then
+            ERROR_MESSAGE+="Alert: RVNL MAR-Spot spread is greater than or equal to 35. Current Spread: $DIFFERENCE\n"
+          fi
+      
+          # Export error message
           echo "ERROR_MESSAGE<<EOF" >> $GITHUB_ENV
           echo -e "$ERROR_MESSAGE" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
       
-          # Check if there were any errors and exit if so
+          # Fail workflow if threshold breached
           if [[ -n "$ERROR_MESSAGE" ]]; then
             echo -e "$ERROR_MESSAGE"
             exit 1
           fi
 
-      - name: send message to whatsapp
-        if: failure()
-        run: |
-          curl -X POST "https://api.twilio.com/2010-04-01/Accounts/${{ secrets.TWILIO_ACCOUNT_SID }}/Messages.json" \
-          --data-urlencode "Body=${{env.ERROR_MESSAGE}}" \
-          --data-urlencode "From=whatsapp:${{ secrets.TWILIO_WHATSAPP_NUMBER }}" \
-          --data-urlencode "To=whatsapp:${{ secrets.TO_WHATSAPP_NUMBER }}" \
-          -u "${{ secrets.TWILIO_ACCOUNT_SID }}:${{ secrets.TWILIO_AUTH_TOKEN }}"
-
-
+      
       - name: Dispatch Slack notification
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0
@@ -113,14 +106,20 @@ jobs:
           payload: |
             {
               "channel": "${{ secrets.SLACK_CHANNEL_ID }}",
-              "text": "${{env.ERROR_MESSAGE}}",
+              "text": "🚨 RVNL Futures Spread Alert",
               "attachments": [
                 {
-                  "title": "Scheduled Job Status: Failed",
+                  "color": "danger",
+                  "title": "Spread Threshold Breached",
                   "fields": [
                     {
-                      "title": "Link to Latest Job",
-                      "value": "https://github.com/TrailheadTechOps/DRM-TA-UCS/actions/runs/${{ env.run_id }}",
+                      "title": "Alert Message",
+                      "value": "${{ env.ERROR_MESSAGE }}",
+                      "short": false
+                    },
+                    {
+                      "title": "Workflow Run",
+                      "value": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                       "short": false
                     }
                   ]
