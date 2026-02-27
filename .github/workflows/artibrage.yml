@@ -75,7 +75,7 @@ jobs:
             ERROR_MESSAGE+="Alert: RVNL MAR-Spot spread is less than or equal to 26. Current Spread: $DIFFERENCE\n"
           fi
       
-          if (( $(echo "$DIFFERENCE >= 27" | bc -l) )); then
+          if (( $(echo "$DIFFERENCE >= 30" | bc -l) )); then
             ERROR_MESSAGE+="Alert: RVNL MAR-Spot spread is greater than or equal to 29. Current Spread: $DIFFERENCE\n"
           fi
       
