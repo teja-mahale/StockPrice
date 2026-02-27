@@ -71,7 +71,7 @@ jobs:
           echo "Spread (MAR - Spot): $DIFFERENCE"
       
           # Threshold checks
-          if (( $(echo "$DIFFERENCE <= 26" | bc -l) )); then
+          if (( $(echo "$DIFFERENCE <= 25" | bc -l) )); then
             ERROR_MESSAGE+="Alert: RVNL MAR-Spot spread is less than or equal to 26. Current Spread: $DIFFERENCE\n"
           fi
       
