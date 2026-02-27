@@ -76,7 +76,7 @@ jobs:
           fi
       
           if (( $(echo "$DIFFERENCE >= 29" | bc -l) )); then
-            ERROR_MESSAGE+="Alert: RVNL MAR-Spot spread is greater than or equal to 35. Current Spread: $DIFFERENCE\n"
+            ERROR_MESSAGE+="Alert: RVNL MAR-Spot spread is greater than or equal to 29. Current Spread: $DIFFERENCE\n"
           fi
       
           # Export error message
