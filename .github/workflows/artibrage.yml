@@ -1,9 +1,8 @@
-
 name: Fetch Equity Futures Data via cURL
 
 on:
-  #repository_dispatch:
-  workflow_dispatch:  # Allows manual trigger
+   repository_dispatch:
+   #workflow_dispatch:
 
 jobs:
   fetch-futures-data:
@@ -22,75 +21,99 @@ jobs:
         run: |
           pip install kiteconnect pandas
 
-     
+      - name: Fetch Futures Data Using cURL
+        id: future2
+        env:
+          KITE_API_KEY: ${{ secrets.API_KEY }}
+          KITE_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        run: |
+          python history.py
 
       - name: Upload CSV Artifact
         uses: actions/upload-artifact@v4
         with:
-         name: spot-futures-data
-         path: kfintech_term_structure_full_6months.csv
+          name: spot-futures-data
+          path: kfintech_term_structure_full_6months.csv
 
-      - name: Compare RVNL Spot vs MAR26 Future
+      - name: Compare Futures Spreads
         id: future
         env:
           KITE_API_KEY: ${{ secrets.API_KEY }}
           KITE_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
-          # Define instruments
-          SPOT="NSE:RVNL"
-          MAR_FUT="NFO:RVNL26MARFUT"
-      
+
           ERROR_MESSAGE=""
-      
-          # Construct API query
-          API_URL="https://api.kite.trade/quote/ltp?i=${SPOT}&i=${MAR_FUT}"
-      
-          # Make API request
-          RESPONSE=$(curl -s -X GET "$API_URL" \
-            -H "X-Kite-Version: 3" \
-            -H "Authorization: token $KITE_API_KEY:$KITE_ACCESS_TOKEN")
-      
-          echo "Response: $RESPONSE"
-      
-          # Extract prices using jq
-          SPOT_PRICE=$(echo "$RESPONSE" | jq --arg sym "$SPOT" -r '.data[$sym].last_price')
-          MAR_PRICE=$(echo "$RESPONSE" | jq --arg sym "$MAR_FUT" -r '.data[$sym].last_price')
-      
-          echo "Spot Price: $SPOT_PRICE"
-          echo "MAR26 Fut Price: $MAR_PRICE"
-      
-          # Validate prices
-          if [[ "$SPOT_PRICE" == "null" || "$MAR_PRICE" == "null" ]]; then
-            echo "Failed to fetch prices"
-            exit 1
-          fi
-      
-          # Calculate spread (Future - Spot)
-          DIFFERENCE=$(echo "$SPOT_PRICE - $MAR_PRICE" | bc -l)
-      
-          echo "Spread (MAR - Spot): $DIFFERENCE"
-      
-          # Threshold checks
-          if (( $(echo "$DIFFERENCE <= 25" | bc -l) )); then
-            ERROR_MESSAGE+="Alert: RVNL MAR-Spot spread is less than or equal to 26. Current Spread: $DIFFERENCE\n"
-          fi
-      
-          if (( $(echo "$DIFFERENCE >= 30" | bc -l) )); then
-            ERROR_MESSAGE+="Alert: RVNL MAR-Spot spread is greater than or equal to 29. Current Spread: $DIFFERENCE\n"
-          fi
-      
-          # Export error message
+
+          check_spread() {
+            SYMBOL=$1
+            NEAR_FUT=$2
+            FAR_FUT=$3
+            LOWER_LIMIT=$4
+            UPPER_LIMIT=$5
+
+            echo "Checking $SYMBOL"
+
+            API_URL="https://api.kite.trade/quote/ltp?i=${NEAR_FUT}&i=${FAR_FUT}"
+
+            RESPONSE=$(curl -s -X GET "$API_URL" \
+              -H "X-Kite-Version: 3" \
+              -H "Authorization: token $KITE_API_KEY:$KITE_ACCESS_TOKEN")
+
+            echo "$SYMBOL Response: $RESPONSE"
+
+            NEAR_PRICE=$(echo "$RESPONSE" | jq --arg sym "$NEAR_FUT" -r '.data[$sym].last_price')
+            FAR_PRICE=$(echo "$RESPONSE" | jq --arg sym "$FAR_FUT" -r '.data[$sym].last_price')
+
+            echo "$SYMBOL Near FUT Price: $NEAR_PRICE"
+            echo "$SYMBOL Far FUT Price: $FAR_PRICE"
+
+            if [[ "$NEAR_PRICE" == "null" || "$FAR_PRICE" == "null" || -z "$NEAR_PRICE" || -z "$FAR_PRICE" ]]; then
+              ERROR_MESSAGE+="Failed to fetch prices for $SYMBOL\n"
+              return
+            fi
+
+            DIFFERENCE=$(echo "$NEAR_PRICE - $FAR_PRICE" | bc -l)
+
+            echo "$SYMBOL Spread: $DIFFERENCE"
+
+            if (( $(echo "$DIFFERENCE <= $LOWER_LIMIT" | bc -l) )); then
+              ERROR_MESSAGE+="🚨 $SYMBOL spread below threshold. Current: $DIFFERENCE | Limit: $LOWER_LIMIT\n"
+            fi
+
+            if (( $(echo "$DIFFERENCE >= $UPPER_LIMIT" | bc -l) )); then
+              ERROR_MESSAGE+="🚨 $SYMBOL spread above threshold. Current: $DIFFERENCE | Limit: $UPPER_LIMIT\n"
+            fi
+          }
+
+          declare -a FUTURES=(            
+           
+            "BDL|NFO:BDL26JULFUT|NFO:BDL26AUGFUT|20|35"
+            "ASTRAL|NFO:ASTRAL26JULFUT|NFO:ASTRAL26AUGFUT|37|45"
+            "IREDA|NFO:IREDA26JULFUT|NFO:IREDA26AUGFUT|2.50|5"
+            "HYUNDAI|NFO:HYUNDAI26JULFUT|NFO:HYUNDAI26AUGFUT|10|40"
+            "LODHA|NFO:LODHA26JULFUT|NFO:LODHA26AUGFUT|20|60"            
+          )
+
+          for FUT in "${FUTURES[@]}"; do
+            IFS='|' read -r SYMBOL NEAR_FUT FAR_FUT LOWER_LIMIT UPPER_LIMIT <<< "$FUT"
+
+            check_spread \
+              "$SYMBOL" \
+              "$NEAR_FUT" \
+              "$FAR_FUT" \
+              "$LOWER_LIMIT" \
+              "$UPPER_LIMIT"
+          done
+
           echo "ERROR_MESSAGE<<EOF" >> $GITHUB_ENV
           echo -e "$ERROR_MESSAGE" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-      
-          # Fail workflow if threshold breached
+
           if [[ -n "$ERROR_MESSAGE" ]]; then
             echo -e "$ERROR_MESSAGE"
             exit 1
           fi
 
-      
       - name: Dispatch Slack notification
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0
@@ -100,7 +123,7 @@ jobs:
           payload: |
             {
               "channel": "${{ secrets.SLACK_CHANNEL_ID }}",
-              "text": "🚨 RVNL Futures Spread Alert",
+              "text": "🚨 Futures Spread Alert",
               "attachments": [
                 {
                   "color": "danger",
