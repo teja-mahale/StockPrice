@@ -1,7 +1,7 @@
 name: Fetch Equity Futures Data via cURL
 
 on:
-   #repository_dispatch:
+   repository_dispatch:
    #workflow_dispatch:
 
 jobs:
@@ -88,9 +88,9 @@ jobs:
           declare -a FUTURES=(            
            
             "BDL|NFO:BDL26JULFUT|NFO:BDL26AUGFUT|20|35"
-            "ASTRAL|NFO:ASTRAL26JULFUT|NFO:ASTRAL26AUGFUT|20|45"
-            "IREDA|NFO:IREDA26JULFUT|NFO:IREDA26AUGFUT|2.50|4"           
-            "LODHA|NFO:LODHA26JULFUT|NFO:LODHA26AUGFUT|30|45"            
+            "ASTRAL|NFO:ASTRAL26JULFUT|NFO:ASTRAL26AUGFUT|20|36"
+            "IREDA|NFO:IREDA26JULFUT|NFO:IREDA26AUGFUT|2|4"           
+            "LODHA|NFO:LODHA26JULFUT|NFO:LODHA26AUGFUT|54|70"            
           )
 
           for FUT in "${FUTURES[@]}"; do
