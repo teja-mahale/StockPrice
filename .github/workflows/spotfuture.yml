@@ -1,0 +1,123 @@
+name: Check Spot vs Future Diff and Notify
+
+on:
+  workflow_dispatch:
+  repository_dispatch: 
+
+jobs:
+  check-diff:
+    runs-on: ubuntu-latest
+
+    env:
+      KITE_API_KEY: ${{ secrets.API_KEY }}
+      KITE_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq bc
+
+      - name: Check spot vs future diff
+        id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ALERT=""
+
+          # Format:
+          # NAME|SPOT_SYMBOL|FUTURE_SYMBOL|HIGH_DIFF_THRESHOLD
+          ENTRIES=(
+            "LODHA|NSE:LODHA|NFO:LODHA26JULFUT|13"
+            # Add more entries here
+            # "ABC|NSE:ABC|NFO:ABC26JULFUT|37"
+          )
+
+          LOW_DIFF_THRESHOLD=10
+
+          for E in "${ENTRIES[@]}"; do
+            IFS='|' read -r NAME SPOT FUT THRESH <<< "$E"
+
+            echo "===================================="
+            echo "Checking $NAME"
+            echo "Spot   : $SPOT"
+            echo "Future : $FUT"
+
+            API_URL="https://api.kite.trade/quote/ltp?i=${SPOT}&i=${FUT}"
+
+            RESPONSE=$(curl -s \
+              -H "X-Kite-Version: 3" \
+              -H "Authorization: token $KITE_API_KEY:$KITE_ACCESS_TOKEN" \
+              "$API_URL")
+
+            SPOT_P=$(echo "$RESPONSE" | jq --arg sym "$SPOT" -r '.data[$sym].last_price')
+            FUT_P=$(echo "$RESPONSE" | jq --arg sym "$FUT" -r '.data[$sym].last_price')
+
+            echo "Spot Price   : $SPOT_P"
+            echo "Future Price : $FUT_P"
+
+            if [[ -z "$SPOT_P" || "$SPOT_P" == "null" || \
+                  -z "$FUT_P" || "$FUT_P" == "null" ]]; then
+              ALERT+="$NAME : Failed to fetch prices\n"
+              continue
+            fi
+
+            DIFF=$(echo "$FUT_P - $SPOT_P" | bc -l)
+            ABS_DIFF=$(echo "$DIFF" | awk '{if($1<0)$1=-$1; print $1}')
+
+            echo "Difference     : $DIFF"
+            echo "Absolute Diff  : $ABS_DIFF"
+
+            if (( $(echo "$ABS_DIFF >= $THRESH" | bc -l) )); then
+              ALERT+="$NAME | HIGH DIFF | Spot=$SPOT_P | Future=$FUT_P | Diff=$DIFF | AbsDiff=$ABS_DIFF | Threshold=$THRESH\n"
+
+            elif (( $(echo "$ABS_DIFF < $LOW_DIFF_THRESHOLD" | bc -l) )); then
+              ALERT+="$NAME | LOW DIFF | Spot=$SPOT_P | Future=$FUT_P | Diff=$DIFF | AbsDiff=$ABS_DIFF | Threshold=$LOW_DIFF_THRESHOLD\n"
+            fi
+          done
+
+          if [[ -n "$ALERT" ]]; then
+            echo "alerts=true" >> "$GITHUB_OUTPUT"
+
+            {
+              echo "alert_body<<EOF"
+              echo -e "$ALERT"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "alerts=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Send Slack notification
+        if: steps.check.outputs.alerts == 'true'
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
+          payload: |
+            {
+              "channel": "${{ secrets.SLACK_CHANNEL_ID }}",
+              "text": "🚨 Spot vs Future Difference Alert",
+              "attachments": [
+                {
+                  "color": "danger",
+                  "title": "Spot-Future Threshold Triggered",
+                  "fields": [
+                    {
+                      "title": "Details",
+                      "value": "${{ steps.check.outputs.alert_body }}",
+                      "short": false
+                    },
+                    {
+                      "title": "Workflow",
+                      "value": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                      "short": false
+                    }
+                  ]
+                }
+              ]
+            }
