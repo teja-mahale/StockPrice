@@ -32,12 +32,12 @@ jobs:
           # Format:
           # NAME|SPOT_SYMBOL|FUTURE_SYMBOL|HIGH_DIFF_THRESHOLD
           ENTRIES=(
-            "LODHA|NSE:LODHA|NFO:LODHA26AUGFUT|80"
+            "LODHA|NSE:LODHA|NFO:LODHA26AUGFUT|90"
             # Add more entries here
             # "ABC|NSE:ABC|NFO:ABC26JULFUT|37"
           )
 
-          LOW_DIFF_THRESHOLD=70
+          LOW_DIFF_THRESHOLD=78
 
           for E in "${ENTRIES[@]}"; do
             IFS='|' read -r NAME SPOT FUT THRESH <<< "$E"
