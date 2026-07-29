@@ -32,7 +32,7 @@ jobs:
           # Format:
           # NAME|SPOT_SYMBOL|FUTURE_SYMBOL|HIGH_DIFF_THRESHOLD
           ENTRIES=(
-            "LODHA|NSE:LODHA|NFO:LODHA26JULFUT|13"
+            "LODHA|NSE:LODHA|NFO:LODHA26AUGFUT|68"
             # Add more entries here
             # "ABC|NSE:ABC|NFO:ABC26JULFUT|37"
           )
