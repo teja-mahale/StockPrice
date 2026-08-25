@@ -88,7 +88,7 @@ jobs:
           declare -a FUTURES=(            
            
             "BDL|NFO:ASTRAL26AUGFUT|NFO:ASTRAL26SEPFUT|10|30"            
-            "IREDA|NFO:IREDA26AUGFUT|NFO:IREDA26SEPFUT|2|5.50"           
+            "IREDA|NFO:IREDA26AUGFUT|NFO:IREDA26SEPFUT|2|5.80"           
             "LODHA|NFO:LODHA26AUGFUT|NFO:LODHA26SEPFUT|20|35"            
           )
 
