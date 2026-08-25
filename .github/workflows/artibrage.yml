@@ -87,10 +87,9 @@ jobs:
 
           declare -a FUTURES=(            
            
-            "BDL|NFO:BDL26JULFUT|NFO:BDL26AUGFUT|40|55"
-            "ASTRAL|NFO:ASTRAL26JULFUT|NFO:ASTRAL26AUGFUT|30|40"
-            "IREDA|NFO:IREDA26JULFUT|NFO:IREDA26AUGFUT|2|4"           
-            "LODHA|NFO:LODHA26JULFUT|NFO:LODHA26AUGFUT|68|80"            
+            "BDL|NFO:ASTRAL26AUGFUT|NFO:ASTRAL26SEPFUT|10|30"            
+            "IREDA|NFO:IREDA26AUGFUT|NFO:IREDA26SEPFUT|2|5"           
+            "LODHA|NFO:LODHA26AUGFUT|NFO:LODHA26SEPFUT|30|20"            
           )
 
           for FUT in "${FUTURES[@]}"; do
