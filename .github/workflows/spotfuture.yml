@@ -2,7 +2,7 @@ name: Check Spot vs Future Diff and Notify
 
 on:
   workflow_dispatch:
-  #repository_dispatch: 
+  repository_dispatch: 
 
 jobs:
   check-diff:
@@ -32,12 +32,12 @@ jobs:
           # Format:
           # NAME|SPOT_SYMBOL|FUTURE_SYMBOL|HIGH_DIFF_THRESHOLD
           ENTRIES=(
-            "LODHA|NSE:LODHA|NFO:LODHA26AUGFUT|63"
-            # Add more entries here
+            "LODHA|NSE:LODHA|NFO:LODHA26SEPFUT|50"
+            "LODHA|NSE:IREDA|NFO:IREDA26SEPFUT|5.50"
             # "ABC|NSE:ABC|NFO:ABC26JULFUT|3"
           )
 
-          LOW_DIFF_THRESHOLD=50
+          LOW_DIFF_THRESHOLD=4.80
 
           for E in "${ENTRIES[@]}"; do
             IFS='|' read -r NAME SPOT FUT THRESH <<< "$E"
