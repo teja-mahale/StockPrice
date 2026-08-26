@@ -37,7 +37,7 @@ jobs:
             # "ABC|NSE:ABC|NFO:ABC26JULFUT|3"
           )
 
-          LOW_DIFF_THRESHOLD=4.80
+          LOW_DIFF_THRESHOLD=4.50
 
           for E in "${ENTRIES[@]}"; do
             IFS='|' read -r NAME SPOT FUT THRESH <<< "$E"
