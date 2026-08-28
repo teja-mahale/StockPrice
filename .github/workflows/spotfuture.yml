@@ -2,7 +2,7 @@ name: Check Spot vs Future Diff and Notify
 
 on:
   workflow_dispatch:
-  #repository_dispatch: 
+  repository_dispatch: 
 
 jobs:
   check-diff:
@@ -30,22 +30,31 @@ jobs:
           ALERT=""
 
           # Format:
-          # NAME|SPOT_SYMBOL|FUTURE_SYMBOL|HIGH_DIFF_THRESHOLD
+          # NAME|SPOT_SYMBOL|FUTURE_SYMBOL|HIGH_DIFF_THRESHOLD|LOW_DIFF_THRESHOLD (LOW optional - fallback to DEFAULT)
           ENTRIES=(
-            "LODHA|NSE:LODHA|NFO:LODHA26SEPFUT|45"
-            "LODHA|NSE:IREDA|NFO:IREDA26SEPFUT|5.50"
-            # "ABC|NSE:ABC|NFO:ABC26JULFUT|3"
+            "LODHA|NSE:LODHA|NFO:LODHA26SEPFUT|45|30"
+            "JUBLFOOD|NSE:JUBLFOOD|NFO:JUBLFOOD26SEPFUT|5|2"
+            "LAURUSLABS|NSE:LAURUSLABS|NFO:LAURUSLABS26SEPFUT|30|10"
+            "IREDA|NSE:IREDA|NFO:IREDA26SEPFUT|6|5.50"
+            # "ABC|NSE:ABC|NFO:ABC26JULFUT|3|1.50"
           )
 
-          LOW_DIFF_THRESHOLD=4.50
+          DEFAULT_LOW_DIFF_THRESHOLD=4.50
 
           for E in "${ENTRIES[@]}"; do
-            IFS='|' read -r NAME SPOT FUT THRESH <<< "$E"
+            IFS='|' read -r NAME SPOT FUT THRESH LOW <<< "$E"
+
+            # If LOW is empty, use default
+            if [[ -z "${LOW// /}" || "$LOW" == "null" ]]; then
+              LOW="$DEFAULT_LOW_DIFF_THRESHOLD"
+            fi
 
             echo "===================================="
             echo "Checking $NAME"
             echo "Spot   : $SPOT"
             echo "Future : $FUT"
+            echo "High threshold : $THRESH"
+            echo "Low threshold  : $LOW"
 
             API_URL="https://api.kite.trade/quote/ltp?i=${SPOT}&i=${FUT}"
 
@@ -75,8 +84,8 @@ jobs:
             if (( $(echo "$ABS_DIFF >= $THRESH" | bc -l) )); then
               ALERT+="$NAME | HIGH DIFF | Spot=$SPOT_P | Future=$FUT_P | Diff=$DIFF | AbsDiff=$ABS_DIFF | Threshold=$THRESH\n"
 
-            elif (( $(echo "$ABS_DIFF < $LOW_DIFF_THRESHOLD" | bc -l) )); then
-              ALERT+="$NAME | LOW DIFF | Spot=$SPOT_P | Future=$FUT_P | Diff=$DIFF | AbsDiff=$ABS_DIFF | Threshold=$LOW_DIFF_THRESHOLD\n"
+            elif (( $(echo "$ABS_DIFF < $LOW" | bc -l) )); then
+              ALERT+="$NAME | LOW DIFF | Spot=$SPOT_P | Future=$FUT_P | Diff=$DIFF | AbsDiff=$ABS_DIFF | Threshold=$LOW\n"
             fi
           done
 
