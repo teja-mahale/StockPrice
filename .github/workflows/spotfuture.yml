@@ -2,7 +2,7 @@ name: Check Spot vs Future Diff and Notify
 
 on:
   workflow_dispatch:
- # repository_dispatch: 
+ #repository_dispatch: 
 
 jobs:
   check-diff:
