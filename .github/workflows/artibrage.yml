@@ -1,7 +1,7 @@
 name: Fetch Equity Futures Data via cURL
 
 on:
-   #repository_dispatch:
+   repository_dispatch:
    #workflow_dispatch:
 
 jobs:
@@ -88,11 +88,12 @@ jobs:
           declare -a FUTURES=(            
            
            
-            "DIXON|NFO:DIXON26SEPFUT|NFO:DIXON26OCTFUT|400|450"
-            "IREDA|NFO:IREDA26SEPFUT|NFO:IREDA26OCTFUT|5|7"
-            "LTM|NFO:LTM26SEPFUT|NFO:LTM26OCTFUT|150|170"                 
-            "HYUNDAI|NFO:HYUNDAI26SEPFUT|NFO:HYUNDAI26OCTFUT|20|45" 
-            "BLUESTARCO|NFO:BLUESTARCO26SEPFUT|NFO:BLUESTARCO26OCTFUT|42|50" 
+            "DIXON|NFO:DIXON26OCTFUT|NFO:DIXON26NOVFUT|240|300"
+            "IREDA|NFO:IREDA26OCTFUT|NFO:IREDA26NOVFUT|4.70|7"
+            "LTM|NFO:LTM26OCTFUT|NFO:LTM26NOVFUT|70|100"                 
+            "HYUNDAI|NFO:HYUNDAI26OCTFUT|NFO:HYUNDAI26NOVFUT|45|60" 
+            "BLUESTARCO|NFO:BLUESTARCO26OCTFUT|NFO:BLUESTARCO26NOVFUT|30|50" 
+            "ATHERENERG|NFO:ATHERENERG26OCTFUT|NFO:ATHERENERG26NOVFUT|35|50" 
             
           )
 
