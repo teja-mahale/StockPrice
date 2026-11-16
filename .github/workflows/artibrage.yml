@@ -1,12 +1,12 @@
 name: Fetch Equity Futures Data via cURL
 
 on:
-   #repository_dispatch:
+   repository_dispatch:
    #workflow_dispatch:
 
 jobs:
   fetch-futures-data:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
 
     steps:
       - name: Checkout Repository
@@ -89,9 +89,10 @@ jobs:
            
            
          
-            "IREDA|NFO:IREDA26OCTFUT|NFO:IREDA26NOVFUT|2|2.80"
-            "HYUNDAI|NFO:HYUNDAI26OCTFUT|NFO:HYUNDAI26NOVFUT|31|40"
-           
+            "AMBER|NFO:AMBER26NOVFUT|NFO:AMBER26DECFUT|10|35"
+            "PHOENIX|NFO:PHOENIX26NOVFUT|NFO:PHOENIX26DECFUT|5|20"
+            "SYRMA|NFO:SYRMA26NOVFUT|NFO:SYRMA26DECFUT|5|20"
+            "DATAPATTNS|NFO:DATAPATTNS26NOVFUT|NFO:DATAPATTNS26DECFUT|10|50"    
 
                     
             
