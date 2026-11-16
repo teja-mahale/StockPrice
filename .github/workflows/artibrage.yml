@@ -6,7 +6,7 @@ on:
 
 jobs:
   fetch-futures-data:
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
