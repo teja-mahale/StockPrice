@@ -2,7 +2,7 @@ name: Check Spot vs Future Diff and Notify
 
 on:
   workflow_dispatch:
- #repository_dispatch: 
+  repository_dispatch: 
 
 jobs:
   check-diff:
@@ -32,11 +32,7 @@ jobs:
           # Format:
           # NAME|SPOT_SYMBOL|FUTURE_SYMBOL|HIGH_DIFF_THRESHOLD|LOW_DIFF_THRESHOLD (LOW optional - fallback to DEFAULT)
           ENTRIES=(
-            "LODHA|NSE:LODHA|NFO:LODHA26SEPFUT|45|30"
-            "JUBLFOOD|NSE:JUBLFOOD|NFO:JUBLFOOD26SEPFUT|5|-1"
-            "LAURUSLABS|NSE:LAURUSLABS|NFO:LAURUSLABS26SEPFUT|25|10"
-            "IREDA|NSE:IREDA|NFO:IREDA26SEPFUT|7|5.50"
-            # "ABC|NSE:ABC|NFO:ABC26JULFUT|3|1.50"
+            "KAYNES|NSE:KAYNES|NFO:KAYNES26NOVFUT|80|67"            
           )
 
           DEFAULT_LOW_DIFF_THRESHOLD=4.50
