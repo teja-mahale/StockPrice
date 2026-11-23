@@ -1,7 +1,7 @@
 name: Fetch Equity Futures Data via cURL
 
 on:
-   #repository_dispatch:
+   repository_dispatch:
    #workflow_dispatch:
 
 jobs:
@@ -89,8 +89,8 @@ jobs:
            
            
          
-            "HYUNDAI|NFO:HYUNDAI26NOVFUT|NFO:HYUNDAI26DECFUT|20|35"            
-            "SYRMA|NFO:SYRMA26NOVFUT|NFO:SYRMA26DECFUT|20|35"                   
+            "HYUNDAI|NFO:HYUNDAI26NOVFUT|NFO:HYUNDAI26DECFUT|40|50"            
+            "BLUESTARCO|NFO:BLUESTARCO26NOVFUT|NFO:BLUESTARCO26DECFUT|19|25"                   
             
           )
 
